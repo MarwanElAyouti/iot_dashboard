@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  base_python: &base_python
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+  base_celery: &base_celery
+    <<: *base_python
+    environment:
+      SERVICE: celery
+    env_file:
+      - .env
+    volumes:
+      - ./:/code
+    depends_on:
+      - rabbit
+      - db
+
+  db:
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    environment:
+      - MYSQL_DATABASE=IoTDashboard
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - 3306:3306
+    volumes:
+      - db:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  app:
+    <<: *base_python
+    command: uvicorn IoTDashboard.app:app --host 0.0.0.0 --port 80 --reload --log-level debug
+    env_file:
+      - .env
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/code
+    depends_on: 
+      - db
+      - rabbit
+
+  rabbit:
+    image: rabbitmq:3-management-alpine
+    env_file:
+      - .env
+    ports:
+      - 15672:15672
+      - 5672:5672
+    logging:
+      driver: none
+
+  celery_worker:
+    <<: *base_celery
+    command: celery -A IoTDashboard.celery worker -l info
+
+  celery_beat:
+    <<: *base_celery
+    command: celery -A IoTDashboard.celery beat -l info
+
+  celery_flower:
+    <<: *base_celery
+    command: celery -A IoTDashboard.celery --broker=${CELERY_BROKER_URL} flower --broker_api=${CELERY_BROKER_API} --port=5555
+    ports:
+      - 5555:5555
+    depends_on:
+      - celery_worker
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis:/data
+
+volumes:
+  db:
+    driver: local
+  redis:
+    driver: local
