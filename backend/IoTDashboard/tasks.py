@@ -13,9 +13,9 @@ def publish_temperature_data():
     mqtt_client = MQTTClient()
     mqtt_client.connect()
     try:
-        topic = "your_topic"
+        topic = "test_topic"
         message = "your_message"
-        mqtt_client.publish()
+        mqtt_client.publish(topic, message)
         print(f"Published to topic")
     except Exception as e:
         print(f"Error: {e}")
