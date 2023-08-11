@@ -2,19 +2,22 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from IoTDashboard.constants import FAST_API_APP
-from IoTDashboard.router import router
-from IoTDashboard.services.middlewares import CustomHTTPSRedirectMiddleware
-from IoTDashboard.services.sentry import init_sentry
-from IoTDashboard.settings import APP_ENV
+from . import models
+from .constants import FAST_API_APP
+from .db import engine
+from .router import router
+from .services.middlewares import CustomHTTPSRedirectMiddleware
+from .services.sentry import init_sentry
+from .settings import APP_ENV
 
-# Sentry
-init_sentry(app=FAST_API_APP)
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 if APP_ENV != "LOCAL":
     app.add_middleware(CustomHTTPSRedirectMiddleware)
+    # Sentry
+    init_sentry(app=FAST_API_APP)
 
 app.add_middleware(
     CORSMiddleware,
