@@ -2,15 +2,8 @@
 
 from collections.abc import Sequence
 
-from IoTDashboard.models.base import Base
+from .base import Base
+from .event import Event
+from .sensor import Sensor
 
-"""
-    e.g.:
-        from collections.abc import Sequence
-
-        from IoTDashboard.models.{model_name} import SomeModel
-
-        __all__: Sequence = (Base, SomeModel)
-"""
-
-__all__: Sequence = (Base,)
+__all__: Sequence = (Base, Sensor, Event)
