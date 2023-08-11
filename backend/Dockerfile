@@ -6,9 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Install poetry dependencies
-RUN apt-get update && apt-get -y install libpq-dev gcc 
-RUN pip install poetry==1.1.11
-
+RUN apt-get update && apt-get -y install libpq-dev gcc && apt-get install -y netcat
+RUN pip install poetry==1.5.1
 COPY ./poetry.lock ./pyproject.toml /code/
 
 RUN poetry config virtualenvs.create false
