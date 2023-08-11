@@ -1,6 +1,4 @@
 # Make schemas visible for import
 
-"""
-    e.g.:
-        from IoTDashboard.schemas.{schema_name} import *  # noqa F401
-"""
+from .event import *  # noqa F401
+from .sensor import *  # noqa F401
